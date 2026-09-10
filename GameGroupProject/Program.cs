@@ -19,7 +19,7 @@ namespace GameGroupProject
         /// </summary>
         static void DisplayMainMenu()
         {
-            WriteGameTitle();
+            DisplayGameTitle();
 
             int selectedGame = SelectGame();
             Console.WriteLine($"Loading {games[selectedGame]} now...");
@@ -28,7 +28,7 @@ namespace GameGroupProject
         /// <summary>
         /// Displays the title in the console.
         /// </summary>
-        static void WriteGameTitle()
+        static void DisplayGameTitle()
         {
             string title = "◈--- Welcome to Arcade! ---◈";
             for (int i = 0; i < title.Length; i++)
@@ -55,7 +55,7 @@ namespace GameGroupProject
 
             while (true)
             {
-                WriteGameMenu(selectedIndex, left, top);
+                DisplayGameMenu(selectedIndex, left, top);
 
                 switch (Console.ReadKey().Key)
                 {
@@ -77,7 +77,7 @@ namespace GameGroupProject
         /// <param name="selectedIndex">The index of the currently selected game.</param>
         /// <param name="left">Column position of the cursor, where the menu should start.</param>
         /// <param name="top">Row position of the cursor, where the menu should start.</param>
-        static void WriteGameMenu(int selectedIndex, int left, int top)
+        static void DisplayGameMenu(int selectedIndex, int left, int top)
         {
             Console.SetCursorPosition(left, top);
             for (int i = 0; i < games.Length; i++)
