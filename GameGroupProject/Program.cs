@@ -7,6 +7,9 @@ namespace GameGroupProject
         const int ROW_SIZE = 5; 
         const int COL_SIZE = 4;
 
+        const int BEEP_FREQUENCY = 500;
+        const int BEEP_DURATION = 80;
+
         static readonly Random random = new();
 
         static readonly char[] pins = ['○', '◔', '◑', '◕', '●'];
@@ -16,7 +19,7 @@ namespace GameGroupProject
             ConsoleColor.Cyan, ConsoleColor.Magenta, ConsoleColor.Yellow
         ];
 
-        static readonly ConsoleColor[,] colorFields = new ConsoleColor[ROW_SIZE, COL_SIZE];
+        static ConsoleColor[,] colorFields = new ConsoleColor[ROW_SIZE, COL_SIZE];
 
         static readonly ConsoleColor[] secretColors = new ConsoleColor[COL_SIZE];
 
@@ -28,6 +31,8 @@ namespace GameGroupProject
         {
             Console.OutputEncoding = Encoding.UTF8;
             Console.CursorVisible = false;
+            Console.Title = "MasterMind";
+
             LoadMainMenu((2, 1));
             Console.ReadKey(true);
         }
@@ -57,7 +62,10 @@ namespace GameGroupProject
                 else if (keyInfo.Key == ConsoleKey.DownArrow)
                     selectedItem = int.Min(selectedItem + 1, items.Length - 1);
                 else if (keyInfo.Key == ConsoleKey.Enter)
+                {
+                    Console.Beep(BEEP_FREQUENCY, BEEP_DURATION);
                     break;
+                }
             }
 
             if (selectedItem == 0)
@@ -102,24 +110,41 @@ namespace GameGroupProject
                 if (keyInfo.Key == ConsoleKey.Enter)
                     break;
             }
+
+            Console.Beep(BEEP_FREQUENCY, BEEP_DURATION);
             LoadMainMenu((2, 1));
         }
 
         static void StartGame((int x, int y) position)
         {
             Console.Clear();
-            (int x, int y, int width, int height) border = CreateBorder("MasterMind", ConsoleColor.Yellow, position, (26, 12), true);
+            (int x, int y, int width, int height) = CreateBorder("MasterMind", possibleColors[random.Next(possibleColors.Length)], position, (26, 12), true);
 
+            RestartGame();
             GenerateSecretColors();
-            (int x, int y) board = CreateBoard((border.x + 7, border.y + 4));
-            CreateColorSelectorMenu((border.x, border.y + border.height + 2), (border.width, 3), board);
+            (int x, int y) board = CreateBoard((x + 7, y + 4));
+            CreateColorSelectorMenu((x, y + height + 2), (width, 3), board);
+        }
+
+        static void RestartGame()
+        {
+            colorFields = new ConsoleColor[ROW_SIZE, COL_SIZE];
+            selectedRow = 0;
+            selectedCol = 0;
+            playerWon = false;
         }
 
         static (int x, int y, int width, int height) CreateBorder(string title, ConsoleColor color, (int x, int y) position, (int x, int y) size, bool particles = false)
         {
-            Console.SetCursorPosition(position.x, position.y);
+            for (int i = 0; i < size.y; i++)
+            {
+                Console.SetCursorPosition(position.x, position.y + i);
+                Console.WriteLine(new string(' ', Console.BufferWidth));
+            }
 
+            Console.SetCursorPosition(position.x, position.y);
             Console.Write('┌');
+
             for (int i = 0; i < size.x; i++)
                 Console.Write('─');
 
@@ -201,6 +226,7 @@ namespace GameGroupProject
                 else if (keyInfo.Key == ConsoleKey.Enter)
                 {
                     PlaceColor(possibleColors[selectedColorIndex], boardPosition);
+                    Console.Beep(BEEP_FREQUENCY, BEEP_DURATION);
 
                     int pinCount = GetPinsByCurrentRow(selectedRow);
                     selectedCol++;
@@ -215,11 +241,16 @@ namespace GameGroupProject
                         selectedRow++;
                         PrintHighlighter('▸', (boardPosition.x - 1, boardPosition.y + selectedRow));
                     }
-                    playerWon = pinCount == COL_SIZE;
-                    if (playerWon) break;
+                    if (pinCount == COL_SIZE)
+                    {
+                        playerWon = true;
+                        break;
+                    }
                 }
             }
+            Console.Beep(1000, 300);
             PrintGameResult(boardPosition);
+            PrintConfirmation(position);
         }
 
         static void PrintColorOptions(int index, (int x, int y) position)
@@ -261,6 +292,44 @@ namespace GameGroupProject
             Console.ForegroundColor = playerWon ? ConsoleColor.Green : ConsoleColor.Red;
             Console.WriteLine(playerWon ? "You win!" : "You lose!");
             Console.ResetColor();
+        }
+
+        static void PrintConfirmation((int x, int y) position)
+        {
+            (int x, int y, int width, int height) = CreateBorder("Confirmation", ConsoleColor.Yellow, position, (26, 5));
+
+            Console.SetCursorPosition(x + width/2 - 9, y + 2);
+            Console.WriteLine("Do you want a retry?");
+
+            string[] items = ["Yes", "No"];
+            int selectedItem = 0;
+
+            while (true)
+            {
+                for (int i = 0; i < items.Length; i++)
+                {
+                    Console.SetCursorPosition(x + 8 + i * 8, y + 4);
+                    Console.ForegroundColor = selectedItem == i ? ConsoleColor.White : ConsoleColor.DarkGray;
+                    Console.Write(items[i]);
+                }
+                Console.ResetColor();
+
+                ConsoleKeyInfo keyInfo = Console.ReadKey(true);
+                if (keyInfo.Key == ConsoleKey.LeftArrow)
+                    selectedItem = int.Max(selectedItem - 1, 0);
+                else if (keyInfo.Key == ConsoleKey.RightArrow)
+                    selectedItem = int.Min(selectedItem + 1, items.Length - 1);
+                else if (keyInfo.Key == ConsoleKey.Enter)
+                {
+                    Console.Beep(BEEP_FREQUENCY, BEEP_DURATION);
+                    break;
+                }
+            }
+
+            if (selectedItem == 0)
+                StartGame((2, 1));
+            else if (selectedItem == 1)
+                LoadMainMenu((2, 1));
         }
 
         static void PlaceColor(ConsoleColor color, (int x, int y) position)
