@@ -12,9 +12,22 @@ namespace HangMan
         {
             Console.WriteLine("Welcome to Hangman, what is the word?");//beder spilleren om at indtaste et ord som skal gættes
             string guessWord = Console.ReadLine();//læser ordet som spilleren indtaster
+
             StringBuilder hiddenWord = new StringBuilder(new string('_', guessWord.Length));//gemmer ordet som spilleren skal gætte
-            int life = 10;//antal forsøg spilleren har til at gætte
+            int life = 7;//antal forsøg spilleren har til at gætte
+            if (guessWord.Contains(" "))
+            {
+                for (int i = 0; i < guessWord.Length; i++)
+                {
+                    if (guessWord[i] == ' ')
+                    {
+                        hiddenWord[i] = ' ';
+                    }
+                }
+            }
+
             Console.WriteLine("Guess the word, you have " + life + " tries.");//beder spilleren om at gætte ordet
+            DisplayHangman(life);
             Console.WriteLine(hiddenWord.ToString());//viser spilleren hvor mange bogstaver der er i ordet som skal gættes
 
             while (life > 0) //så længe spilleren har liv tilbage køre spillet
@@ -35,17 +48,19 @@ namespace HangMan
                     if (correctGuess)//hvis spilleren gættede rigtigt
                     {
                         Console.WriteLine("Good guess! You have " + life + " lives left. What is the next letter?");//beder spilleren om at gætte igen
+                        DisplayHangman(life);
                         Console.WriteLine(hiddenWord.ToString());// viser hvor mange bogstaver der er i ordet dem som er belvet gætte
                     }
                     else //hvis spilleren gættede forkert
                     {
                         life -= 1; //trækker et liv fra spilleren
                         Console.WriteLine("That was wrong you have " + life + " lives left. What is the next letter?"); //beder spilleren om at gætte igen
+                        DisplayHangman(life);
                         Console.WriteLine(hiddenWord.ToString()); // viser hvor mange bogstaver der er i ordet dem som er belvet gætte
                     }
                 }
                 
-                else if (guess.Length > 1) //hvis spilleren gætter et ord
+                else if (guess.Length >= 1) //hvis spilleren gætter et ord
                 {
                     for (int i = 0; i < guessWord.Length; i++)//går igennem ordet som spilleren skal gætte
                     {
@@ -59,12 +74,15 @@ namespace HangMan
                     if (correctGuess) //
                     {
                         Console.WriteLine("That was right!"); //beder spilleren om at gætte igen
+                        DisplayHangman(life);
                         Console.WriteLine(hiddenWord.ToString());// viser hvor mange bogstaver der er i ordet dem som er belvet gætte
+                        
                     }
                     else
                     {
                         life -= 2;
                         Console.WriteLine("That was wrong " + life);
+                        DisplayHangman(life);
                         Console.WriteLine(hiddenWord.ToString());
                     }
                 
@@ -102,6 +120,96 @@ namespace HangMan
                         break;
                     }
                 }
+            }
+
+            static void DisplayHangman(int life)
+            {
+                string[] stages =
+                {
+                    // final state: head, torso, both arms, and both legs
+                    @"
+                           --------
+                           |      |
+                           |      O
+                           |     \|/
+                           |      |
+                           |     / \
+                           -
+                        ",
+                    // head, torso, both arms, and one leg
+                    @"
+                           --------
+                           |      |
+                           |      O
+                           |     \|/
+                           |      |
+                           |     / 
+                           -
+                        ",
+                    // head, torso, and both arms
+                    @"
+                           --------
+                           |      |
+                           |      O
+                           |     \|/
+                           |      |
+                           |      
+                           -
+                        ",
+                    // head, torso, and one arm
+                    @"
+                           --------
+                           |      |
+                           |      O
+                           |     \|
+                           |      |
+                           |     
+                           -
+                        ",
+                    // head and torso
+                    @"
+                           --------
+                           |      |
+                           |      O
+                           |      |
+                           |      |
+                           |     
+                           -
+                        ",
+                    // head
+                    @"
+                           --------
+                           |      |
+                           |      O
+                           |    
+                           |      
+                           |     
+                           -
+                        ",
+                    // initial empty state
+                    @"
+                           --------
+                           |      |
+                           |      
+                           |    
+                           |      
+                           |     
+                           -
+                        ",
+                    
+                    // initial empty state
+                    @"
+                           
+                                 
+                                 
+                               
+                                 
+                                
+                           -
+                        ",
+                };
+
+                Console.WriteLine(stages[life]);
             }
         }
     }
