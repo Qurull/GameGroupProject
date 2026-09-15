@@ -24,34 +24,35 @@ namespace GameGroupProject
         static int gridSizeY;
         static int bombs;
         static int bombsMinusFlags;
-        static char[,] grid = new char[gridSizeX, gridSizeY];
-        static bool[,] isRevealed = new bool[gridSizeX, gridSizeY];
-        static bool[,] flagPlaced = new bool[gridSizeX, gridSizeY];
+        static char[,] grid;
+        static bool[,] isRevealed;
+        static bool[,] flagPlaced;
         static Random random = new Random();
         static (int x, int y) cursor = (0,0);
         static bool timerIsRunning = false;
-        static int timeSinceGameStart = 0;
+        static int elapsedTime = 0;
         static string currentSmiley = ":)";
-        static ManualResetEvent mre1 = new ManualResetEvent(true);
-        static ManualResetEvent mre2 = new ManualResetEvent(true);
+        static long gameStartTime;
+        static int lastDisplayedTime = -1;
         static void Main(string[] args)
+        {
+            Minesweeper();
+        }
+
+        static void Minesweeper()
         {
             Console.CursorVisible = false;
             Console.OutputEncoding = Encoding.UTF8;
-            /*
-            Console.Write("Grid size x: ");
-            while (!int.TryParse(Console.ReadLine(), out gridSizeX)) ;
-            Console.Write("Grid size y: ");
-            while (!int.TryParse(Console.ReadLine(), out gridSizeY)) ;
-            */
+
             while (MinesweeperMenu())
             {
-                Minesweeper();
+                StartGame();
             }
         }
+
         static bool MinesweeperMenu() // Returns true if the player starts the game, false if the player quits.
         {
-            // All of this code is so dogshit, I just wanna get this over with, ignore it
+            // Don't looks at this code pls :(
             Console.SetWindowSize(35, 15);
             while (true)
             {
@@ -87,8 +88,6 @@ namespace GameGroupProject
 
                 int menu = selectedIndex;
 
-                // There is a disgusting amount of temporary stupid useless variables and hardcoded bullshit in this method, I want to throw up
-                // RAAAAAAGH I FUCKING HATE THIS SHIT THIS IS SO ASS JUST WORK FOR FUCKS SAKE :sob:
                 if (menu == 0)
                 {
                     for (int i = 0; i < difficulties.Length + 1; i++)
@@ -305,16 +304,10 @@ namespace GameGroupProject
             Console.ResetColor();
         }
 
-        static void Minesweeper()
+        static void StartGame()
         {
             // Set variables
-            cursor = (0, 0);
-            bombsMinusFlags = bombs;
-            grid = new char[gridSizeX, gridSizeY];
-            isRevealed = new bool[gridSizeX, gridSizeY];
-            flagPlaced = new bool[gridSizeX, gridSizeY];
-            timeSinceGameStart = 0;
-            currentSmiley = ":)";
+            ResetVariables();
 
             // Set up console
             Console.SetWindowSize(gridSizeX * 2, gridSizeY + 2);
@@ -329,11 +322,17 @@ namespace GameGroupProject
             Console.SetWindowSize(gridSizeX * 2, gridSizeY + 1);
             while (!playerDied && !PlayerWon())
             {
+                UpdateGameTimer();
+
+                if (!Console.KeyAvailable)
+                {
+                    Thread.Sleep(10);
+                    continue;
+                }
+
                 ConsoleKeyInfo key = Console.ReadKey(true);
-                mre1.Reset(); // Since pretty much the entire game happens in this loop, stopping the timer thread while the code in this loop runs *should* make the game thread-safe, but idk for sure lol
                 if (key.Key == ConsoleKey.Escape)
                 {
-                    gridGenerated = false;
                     return;
                 }
 
@@ -358,18 +357,15 @@ namespace GameGroupProject
                 PrintChar(cursor.x, cursor.y, true);
                 if(!playerDied && !PlayerWon())
                 {
-                    if(random.Next(1) == 0)
+                    if(random.Next(31) == 0) // 1/X chance of randomly changing the smiley for the sake of funny. X is the number passed to the Next method minus 1.
                     {
                         PrintHeadline("", true);
                     }
                 }
-                mre1.Set();
-                Thread.Sleep(2);
-                mre2.WaitOne();
             }
             if (playerDied)
             {
-                PrintHeadline("X(");
+                PrintHeadline("X(", true);
                 Thread.Sleep(250);
                 // Reveal the whole grid
                 for (int i = 0; i < grid.GetLength(0); i++)
@@ -391,8 +387,6 @@ namespace GameGroupProject
                 ConsoleKey key = Console.ReadKey(true).Key;
                 while (key != ConsoleKey.W && key != ConsoleKey.A && key != ConsoleKey.S && key != ConsoleKey.D && key != ConsoleKey.UpArrow && key != ConsoleKey.LeftArrow && key != ConsoleKey.DownArrow && key != ConsoleKey.RightArrow) key = Console.ReadKey(true).Key;
             }
-            gridGenerated = false;
-            timerIsRunning = false;
         }
 
         static void PrintHeadline(string smiley = ":)", bool changeSmiley = false) // If newSmiley is empty, I will consider that wanting to make it random
@@ -400,7 +394,7 @@ namespace GameGroupProject
             Console.SetCursorPosition(0, 0);
             Console.BackgroundColor = headlineColor;
             Console.ForegroundColor = (int)headlineColor < 9 ? ConsoleColor.White : ConsoleColor.Black;
-            if(smiley.Length == 0)
+            if (smiley.Length == 0)
             {
                 // Choose random fun smiley
                 string[] smileys = new string[]
@@ -410,15 +404,15 @@ namespace GameGroupProject
                 smiley = smileys[random.Next(smileys.Length)];
                 currentSmiley = smiley;
             }
+            else if (!changeSmiley) smiley = currentSmiley;
             int bombCounterSize = bombsMinusFlags.ToString().Length;
             bombCounterSize = bombCounterSize <= gridSizeX * 2 ? bombCounterSize : gridSizeX * 2;
             bombCounterSize = Math.Max(gridSizeX > 1 ? 3 : 2, bombCounterSize);
             bool displayTimer = gridSizeX * 2 - bombCounterSize > 3;
             bool displaySmiley = gridSizeX * 2 - bombCounterSize > 3 + (changeSmiley ? smiley.Length + 1 : currentSmiley.Length + 1);
             int padSize = Console.WindowWidth - bombCounterSize - (displayTimer ? 3 : 0) - (displaySmiley ? smiley.Length : 0);
-            string pad = new string(' ', padSize / 2); // Padding between stuff in the menu bar of the game. -3 and -2 because of the smiley and timer.
-            int localTime = timeSinceGameStart;
-            Console.Write($"\x1B[4m{(bombsMinusFlags.ToString().Length > bombCounterSize ? new string('9', bombCounterSize) : bombsMinusFlags.ToString()).PadLeft(bombCounterSize, '0') + pad + (displaySmiley ? changeSmiley ? smiley : currentSmiley : "") + (padSize % 2 != 0 ? " " : "") + pad + (displayTimer ? localTime > 999 ? "999" : localTime.ToString().PadLeft(3,'0') : "")}\x1B[0m");
+            string pad = new string(' ', padSize / 2); // Padding between stuff in the menu bar of the game.
+            Console.Write($"\x1B[4m{(bombsMinusFlags.ToString().Length > bombCounterSize ? new string('9', bombCounterSize) : bombsMinusFlags.ToString()).PadLeft(bombCounterSize, '0') + pad + (displaySmiley ? changeSmiley ? smiley : currentSmiley : "") + (padSize % 2 != 0 ? " " : "") + pad + (displayTimer ? elapsedTime > 999 ? "999" : elapsedTime.ToString().PadLeft(3,'0') : "")}\x1B[0m");
             if (!gridGenerated) Console.Write("\n");
         }
 
@@ -609,22 +603,7 @@ namespace GameGroupProject
                 PopulateGrid(bombs);
                 gridGenerated = true;
                 // Start timer
-                timerIsRunning = true;
-                new Thread(() =>
-                {
-                    while (timerIsRunning)
-                    {
-                        Thread.Sleep(998);
-                        timeSinceGameStart++;
-                        mre1.WaitOne();
-                        Thread.Sleep(2);
-                        mre2.Reset();
-                        if (!playerDied && !PlayerWon()) PrintHeadline(currentSmiley);
-                        mre2.Set();
-                    }
-                    
-                    mre2.Set();
-                }).Start();
+                StartGameTimer();
             }
 
             // Do nothing if the player has marked this spot as a bomb
@@ -693,6 +672,47 @@ namespace GameGroupProject
             }
 
             return score == gridSizeX * gridSizeY - bombs;
+        }
+
+        static void StartGameTimer()
+        {
+            gameStartTime = Stopwatch.GetTimestamp();
+            elapsedTime = 0;
+            lastDisplayedTime = -1;
+            timerIsRunning = true;
+        }
+
+        static void UpdateGameTimer()
+        {
+            // ChatGPT helped me cook this up.
+            if (!timerIsRunning) return;
+
+            // GetTimeStamp returns time passed in ticks. Dividng by frequency effectively turns the time passed in ticks into time passed in seconds, because the frequency is the ticks per second.
+            int elapsedSeconds = (int)((Stopwatch.GetTimestamp() - gameStartTime) / (double)Stopwatch.Frequency);
+
+            if (elapsedSeconds != lastDisplayedTime)
+            {
+                elapsedTime = elapsedSeconds;
+                lastDisplayedTime = elapsedSeconds;
+
+                if (!playerDied && gridGenerated)
+                {
+                    PrintHeadline(currentSmiley);
+                }
+            }
+        }
+
+        static void ResetVariables() // Small helper method that just resets a bunch of variables back to default values when the player restarts a game.
+        {
+            cursor = (0, 0);
+            bombsMinusFlags = bombs;
+            grid = new char[gridSizeX, gridSizeY];
+            isRevealed = new bool[gridSizeX, gridSizeY];
+            flagPlaced = new bool[gridSizeX, gridSizeY];
+            elapsedTime = 0;
+            gridGenerated = false;
+            timerIsRunning = false;
+            currentSmiley = ":)";
         }
     }
 }
