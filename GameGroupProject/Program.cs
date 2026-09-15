@@ -6,15 +6,20 @@ namespace HangMan
     {
         static void Main(string[] args)
         {
+            Console.OutputEncoding = System.Text.Encoding.UTF8; /*Sætter encoding til UTF-8 så man kan*/
+
             HangMan(); /*Krøre hangman som spillet liger i*/
         }
         static void HangMan() //Metoden som køre hangman spillet
         {
+            Console.Clear(); //rydder konsollen for tekst
             Console.WriteLine("Welcome to Hangman, what is the word?");//beder spilleren om at indtaste et ord som skal gættes
+            
             string guessWord = Console.ReadLine();//læser ordet som spilleren indtaster
+            Console.SetCursorPosition(0, Console.CursorTop - 1); //flytter cursoren op en linje
 
             StringBuilder hiddenWord = new StringBuilder(new string('_', guessWord.Length));//gemmer ordet som spilleren skal gætte
-            int life = 7;//antal forsøg spilleren har til at gætte
+            int life = 1;//antal forsøg spilleren har til at gætte
             if (guessWord.Contains(" "))
             {
                 for (int i = 0; i < guessWord.Length; i++)
@@ -47,16 +52,20 @@ namespace HangMan
                     }
                     if (correctGuess)//hvis spilleren gættede rigtigt
                     {
+                        Console.SetCursorPosition(0, Console.CursorTop - 12); //flytter cursoren op en linje
                         Console.WriteLine("Good guess! You have " + life + " lives left. What is the next letter?");//beder spilleren om at gætte igen
                         DisplayHangman(life);
                         Console.WriteLine(hiddenWord.ToString());// viser hvor mange bogstaver der er i ordet dem som er belvet gætte
+
                     }
                     else //hvis spilleren gættede forkert
                     {
                         life -= 1; //trækker et liv fra spilleren
+                        Console.SetCursorPosition(0, Console.CursorTop - 12); //flytter cursoren op en linje
                         Console.WriteLine("That was wrong you have " + life + " lives left. What is the next letter?"); //beder spilleren om at gætte igen
                         DisplayHangman(life);
                         Console.WriteLine(hiddenWord.ToString()); // viser hvor mange bogstaver der er i ordet dem som er belvet gætte
+
                     }
                 }
                 
@@ -73,18 +82,22 @@ namespace HangMan
 
                     if (correctGuess) //
                     {
-                        Console.WriteLine("That was right!"); //beder spilleren om at gætte igen
+                        Console.SetCursorPosition(0, Console.CursorTop - 12); //flytter cursoren op en linje
+                        Console.WriteLine("Some of the letters match! You have " + life + " lives left. What is the next letter?");//beder spilleren om at gætte igen
                         DisplayHangman(life);
                         Console.WriteLine(hiddenWord.ToString());// viser hvor mange bogstaver der er i ordet dem som er belvet gætte
-                        
+
                     }
                     else
                     {
                         life -= 2;
-                        Console.WriteLine("That was wrong " + life);
+                        Console.SetCursorPosition(0, Console.CursorTop - 12); //flytter cursoren op en linje
+                        Console.WriteLine("None of the letters match. You have " + life + " lives left. What is the next letter?"); //beder spilleren om at gætte igen
                         DisplayHangman(life);
-                        Console.WriteLine(hiddenWord.ToString());
+                        Console.WriteLine(hiddenWord.ToString()); // viser hvor mange bogstaver der er i ordet dem som er belvet gætte
                     }
+
+
                 
                 }
 
@@ -128,84 +141,84 @@ namespace HangMan
                 {
                     // final state: head, torso, both arms, and both legs
                     @"
-                           --------
-                           |      |
-                           |      O
-                           |     \|/
-                           |      |
-                           |     / \
-                           -
+                          --------
+                          |      |
+                          |      O
+                          |     \|/
+                          |      |
+                          |     / \
+                          -
                         ",
                     // head, torso, both arms, and one leg
                     @"
-                           --------
-                           |      |
-                           |      O
-                           |     \|/
-                           |      |
-                           |     / 
-                           -
+                          --------
+                          |      |
+                          |      O
+                          |     \|/
+                          |      |
+                          |     / 
+                          -
                         ",
                     // head, torso, and both arms
                     @"
-                           --------
-                           |      |
-                           |      O
-                           |     \|/
-                           |      |
-                           |      
-                           -
+                          --------
+                          |      |
+                          |      O
+                          |     \|/
+                          |      |
+                          |      
+                          -
                         ",
                     // head, torso, and one arm
                     @"
-                           --------
-                           |      |
-                           |      O
-                           |     \|
-                           |      |
-                           |     
-                           -
+                          --------
+                          |      |
+                          |      O
+                          |     \|
+                          |      |
+                          |     
+                          -
                         ",
                     // head and torso
                     @"
-                           --------
-                           |      |
-                           |      O
-                           |      |
-                           |      |
-                           |     
-                           -
+                          --------
+                          |      |
+                          |      O
+                          |      |
+                          |      |
+                          |     
+                          -
                         ",
                     // head
                     @"
-                           --------
-                           |      |
-                           |      O
-                           |    
-                           |      
-                           |     
-                           -
+                          --------
+                          |      |
+                          |      O
+                          |    
+                          |      
+                          |     
+                          -
                         ",
-                    // initial empty state
+                    // poll
                     @"
-                           --------
-                           |      |
-                           |      
-                           |    
-                           |      
-                           |     
-                           -
+                          --------
+                          |      |
+                          |      
+                          |    
+                          |      
+                          |     
+                          -
                         ",
                     
                     // initial empty state
                     @"
-                           
-                                 
-                                 
-                               
-                                 
+                          
                                 
-                           -
+                                
+                              
+                                
+                               
+                          -
                         ",
                 };
 
