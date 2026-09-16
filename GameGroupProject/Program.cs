@@ -29,31 +29,35 @@ namespace GameGroupProject
 
         static void Main(string[] args)
         {
-            Console.OutputEncoding = Encoding.UTF8;
-            Console.CursorVisible = false;
-            Console.Title = "MasterMind";
+            Console.OutputEncoding = Encoding.Unicode;
 
-            LoadMainMenu((2, 1));
-            Console.ReadKey(true);
+            LoadMasterMind((2, 1));
         }
 
-        static void LoadMainMenu((int x, int y) position)
+        static void LoadMasterMind((int x, int y) position)
         {
             Console.Clear();
-            (int x, int y, int width, int height) border = CreateBorder("MasterMind", possibleColors[random.Next(possibleColors.Length)], position, (26, 12), true);
+            Console.Title = "MasterMind";
+            Console.CursorVisible = false;
+
+            (int x, int y, int width, int height) border = PrintBorder("MasterMind", possibleColors[random.Next(possibleColors.Length)], ConsoleColor.White, position, (26, 12), true, true);
             string[] items = ["Play", "Guides", "Quit"];
             int selectedItem = 0;
+            bool animated = true;
 
             while (true)
             {
                 for (int i = 0; i < items.Length; i++)
                 {
+                    if (animated) Thread.Sleep(100);
+
                     bool selected = selectedItem == i;
                     (int x, int y) = ((border.x + border.width/2), (border.y + border.height/2) - 1);
-                    Console.SetCursorPosition(x - items[i].Length/2 - 1, y + i * 2);
+                    Console.SetCursorPosition(x - items[i].Length/2 - 1, y + i * 2 - 1);
                     Console.ForegroundColor = selected ? possibleColors[random.Next(possibleColors.Length)] : ConsoleColor.White;
                     Console.WriteLine(selected ? $"● {items[i]} ●" : $"  {items[i]}  ");
                 }
+                if (animated) animated = false;
                 Console.ResetColor();
 
                 ConsoleKeyInfo keyInfo = Console.ReadKey(true);
@@ -71,15 +75,15 @@ namespace GameGroupProject
             if (selectedItem == 0)
                 StartGame((border.x, border.y));
             else if (selectedItem == 1)
-                LoadGameRuleMenu((border.x, border.y));
+                PrintGameRuleMenu((border.x, border.y));
             else if (selectedItem == 2)
                 return;
         }
 
-        static void LoadGameRuleMenu((int x, int y) position)
+        static void PrintGameRuleMenu((int x, int y) position)
         {
             Console.Clear();
-            (int x, int y, int width, int height) = CreateBorder("Guide", ConsoleColor.Yellow, position, (110, 13), true);
+            (int x, int y, int width, int height) = PrintBorder("Guide", ConsoleColor.Yellow, ConsoleColor.White, position, (110, 14), true, true);
 
             Console.SetCursorPosition(x + width/2 - 7, y + 2);
             Console.WriteLine("● How to play ●");
@@ -112,18 +116,18 @@ namespace GameGroupProject
             }
 
             Console.Beep(BEEP_FREQUENCY, BEEP_DURATION);
-            LoadMainMenu((2, 1));
+            LoadMasterMind((2, 1));
         }
 
         static void StartGame((int x, int y) position)
         {
             Console.Clear();
-            (int x, int y, int width, int height) = CreateBorder("MasterMind", possibleColors[random.Next(possibleColors.Length)], position, (26, 12), true);
+            (int x, int y, int width, int height) = PrintBorder("MasterMind", possibleColors[random.Next(possibleColors.Length)], ConsoleColor.White, position, (27, 13), true, true);
 
             RestartGame();
             GenerateSecretColors();
-            (int x, int y) board = CreateBoard((x + 7, y + 4));
-            CreateColorSelectorMenu((x, y + height + 2), (width, 3), board);
+            (int x, int y) board = PrintBoard((x + 5, y + 4));
+            PrintColorSelectorMenu((x, y + height + 1), (width, 4), board);
         }
 
         static void RestartGame()
@@ -134,72 +138,53 @@ namespace GameGroupProject
             playerWon = false;
         }
 
-        static (int x, int y, int width, int height) CreateBorder(string title, ConsoleColor color, (int x, int y) position, (int x, int y) size, bool particles = false)
+        static (int x, int y, int width, int height) PrintBorder(string title, ConsoleColor titleColor, ConsoleColor borderColor, (int x, int y) position, (int x, int y) size, bool particles = false, bool animate = false)
         {
-            for (int i = 0; i < size.y; i++)
+            for (int y = 0; y <= size.y; y++)
             {
-                Console.SetCursorPosition(position.x, position.y + i);
-                Console.WriteLine(new string(' ', Console.BufferWidth));
-            }
-
-            Console.SetCursorPosition(position.x, position.y);
-            Console.Write('┌');
-
-            for (int i = 0; i < size.x; i++)
-                Console.Write('─');
-
-            Console.SetCursorPosition(position.x + size.x / 2 - title.Length / 2, position.y);
-            Console.ForegroundColor = color;
-            Console.Write($" {title} ");
-            Console.ResetColor();
-
-            Console.SetCursorPosition(position.x + size.x + 1, position.y);
-            Console.Write('┐');
-
-            for (int i = 0; i < size.y; i++)
-            {
-                Console.SetCursorPosition(position.x, position.y + i + 1);
-                Console.Write('│');
-            }
-            for (int i = 0; i < size.y; i++)
-            {
-                Console.SetCursorPosition(position.x + size.x + 1, position.y + i + 1);
-                Console.Write('│');
-            }
-
-            Console.SetCursorPosition(position.x, position.y + size.y + 1);
-            Console.Write('└');
-
-            for (int i = 0; i < size.x; i++)
-                Console.Write('─');
-            Console.Write('┘');
-
-            if (particles)
-            {
-                for (int i = 0; i < 24; i++)
+                for (int x = 0; x <= size.x; x++)
                 {
-                    Console.SetCursorPosition(position.x + random.Next(size.x) + 1, position.y + random.Next(size.y) + 1);
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.Write('•');
+                    char character = ' ';
+                    if (x == 0 && y == 0) character = '┌';
+                    else if (x == size.x && y == 0) character = '┐';
+                    else if (x == 0 && y == size.y) character = '└';
+                    else if (x == size.x && y == size.y) character = '┘';
+                    else if (y == 0 || y == size.y) character = '─';
+                    else if (x == 0 || x == size.x) character = '│';
+
+                    bool spawnParticle = particles && random.NextDouble() <= 0.1 && x > 0 && x < size.x && y > 0 && y < size.y;
+                    if (spawnParticle) character = '•';
+
+                    Console.ForegroundColor = spawnParticle ? ConsoleColor.DarkGray : borderColor;
+                    Console.SetCursorPosition(position.x + x, position.y + y);
+                    Console.Write(character);
+                    Console.ResetColor();
                 }
-                Console.ResetColor();
+                if (animate) Thread.Sleep(50);
             }
+            if (title != null)
+            {
+                Console.ForegroundColor = titleColor;
+                Console.SetCursorPosition(position.x + (size.x - (title.Length + 2)) / 2, position.y);
+                Console.Write($" {title} ");
+            }
+            Console.ResetColor();
 
             return (position.x, position.y, size.x, size.y);
         }
 
-        static (int x, int y) CreateBoard((int x, int y) position)
+        static (int x, int y) PrintBoard((int x, int y) position)
         {
             for (int row = 0; row < colorFields.GetLength(0); row++)
             {
                 PrintHighlighter(selectedRow == row ? '▸' : ' ', (position.x - 1, position.y + row));
                 for (int col = 0; col < colorFields.GetLength(1); col++)
                     Console.Write('○');
-                Console.WriteLine(" │ Pins: " + pins[0]);
+                Console.WriteLine($" │ 🏳️: {pins[0]} 🚩: {pins[0]}");
             }
 
             Console.SetCursorPosition(position.x, position.y + colorFields.GetLength(0));
-            for (int i = 0; i < 14; i++)
+            for (int i = 0; i < 18; i++)
                 Console.Write('─');
 
             Console.SetCursorPosition(position.x, position.y + colorFields.GetLength(0) + 1);
@@ -209,9 +194,9 @@ namespace GameGroupProject
             return position;
         }
 
-        static void CreateColorSelectorMenu((int x, int y) position, (int y, int x) size, (int x, int y) boardPosition)
+        static void PrintColorSelectorMenu((int x, int y) position, (int y, int x) size, (int x, int y) boardPosition)
         {
-            CreateBorder("Guess a Color", ConsoleColor.Yellow, position, size);
+            PrintBorder("Guess a Color", ConsoleColor.Yellow, ConsoleColor.White, position, size, false, true);
             int selectedColorIndex = 0;
 
             while (!playerWon && selectedRow < ROW_SIZE)
@@ -228,20 +213,23 @@ namespace GameGroupProject
                     PlaceColor(possibleColors[selectedColorIndex], boardPosition);
                     Console.Beep(BEEP_FREQUENCY, BEEP_DURATION);
 
-                    int pinCount = GetPinsByCurrentRow(selectedRow);
+                    (int correctColorsCount, int incorrectColorsCount) = GetPinsByCurrentRow(selectedRow);
                     selectedCol++;
 
                     if (selectedCol >= COL_SIZE)
                     {
-                        Console.SetCursorPosition(boardPosition.x + 13, boardPosition.y + selectedRow);
-                        Console.Write(pins[pinCount]);
+                        Console.SetCursorPosition(boardPosition.x + 11, boardPosition.y + selectedRow);
+                        Console.Write(pins[correctColorsCount]);
+
+                        Console.SetCursorPosition(boardPosition.x + 17, boardPosition.y + selectedRow);
+                        Console.Write(pins[incorrectColorsCount]);
                         selectedCol = 0;
 
                         PrintHighlighter(' ', (boardPosition.x - 1, boardPosition.y + selectedRow));
                         selectedRow++;
                         PrintHighlighter('▸', (boardPosition.x - 1, boardPosition.y + selectedRow));
                     }
-                    if (pinCount == COL_SIZE)
+                    if (correctColorsCount == COL_SIZE)
                     {
                         playerWon = true;
                         break;
@@ -257,8 +245,8 @@ namespace GameGroupProject
         {
             for (int i = 0; i < possibleColors.Length; i++)
             {
-                Console.SetCursorPosition(position.x + i * 2, position.y);
                 Console.ForegroundColor = possibleColors[i];
+                Console.SetCursorPosition(position.x + i * 2, position.y);
                 Console.Write('●');
                 Console.ResetColor();
 
@@ -277,8 +265,8 @@ namespace GameGroupProject
         {
             for (int i = 0; i < secretColors.Length; i++)
             {
-                Console.SetCursorPosition(position.x + i, position.y);
                 Console.ForegroundColor = secretColors[i];
+                Console.SetCursorPosition(position.x + i, position.y);
                 Console.WriteLine('●');
             }
             Console.ResetColor();
@@ -288,15 +276,15 @@ namespace GameGroupProject
         {
             RevealSecretColors((position.x, position.y + ROW_SIZE + 1));
 
-            Console.SetCursorPosition(position.x + 2, position.y - 2);
             Console.ForegroundColor = playerWon ? ConsoleColor.Green : ConsoleColor.Red;
+            Console.SetCursorPosition(position.x + 5, position.y - 2);
             Console.WriteLine(playerWon ? "You win!" : "You lose!");
             Console.ResetColor();
         }
 
         static void PrintConfirmation((int x, int y) position)
         {
-            (int x, int y, int width, int height) = CreateBorder("Confirmation", ConsoleColor.Yellow, position, (26, 5));
+            (int x, int y, int width, int height) = PrintBorder("Confirmation", ConsoleColor.Yellow, ConsoleColor.White, position, (27, 6), false, true);
 
             Console.SetCursorPosition(x + width/2 - 9, y + 2);
             Console.WriteLine("Do you want a retry?");
@@ -308,8 +296,8 @@ namespace GameGroupProject
             {
                 for (int i = 0; i < items.Length; i++)
                 {
-                    Console.SetCursorPosition(x + 8 + i * 8, y + 4);
                     Console.ForegroundColor = selectedItem == i ? ConsoleColor.White : ConsoleColor.DarkGray;
+                    Console.SetCursorPosition(x + 8 + i * 8, y + 4);
                     Console.Write(items[i]);
                 }
                 Console.ResetColor();
@@ -329,15 +317,15 @@ namespace GameGroupProject
             if (selectedItem == 0)
                 StartGame((2, 1));
             else if (selectedItem == 1)
-                LoadMainMenu((2, 1));
+                LoadMasterMind((2, 1));
         }
 
         static void PlaceColor(ConsoleColor color, (int x, int y) position)
         {
             colorFields[selectedRow, selectedCol] = color;
 
-            Console.SetCursorPosition(position.x + selectedCol, position.y + selectedRow);
             Console.ForegroundColor = color;
+            Console.SetCursorPosition(position.x + selectedCol, position.y + selectedRow);
             Console.Write(pins[^1]);
             Console.ResetColor();
         }
@@ -350,15 +338,37 @@ namespace GameGroupProject
             Console.ResetColor();
         }
 
-        static int GetPinsByCurrentRow(int row)
+        static (int corrects, int incorrects) GetPinsByCurrentRow(int row)
         {
-            int correctColorsCount = 0;
+            int corrects = 0, incorrects = 0;
+            bool[] used = new bool[secretColors.Length];
 
-            for (int col = 0; col < secretColors.Length; col++)
-                if (colorFields[row, col] == secretColors[col])
-                    correctColorsCount++;
+            for (int i = 0; i < secretColors.Length; i++)
+            {
+                if (colorFields[row, i] == secretColors[i])
+                {
+                    used[i] = true;
+                    corrects++;
+                }
+            }
 
-            return correctColorsCount;
+            for (int i = 0; i < secretColors.Length; i++)
+            {
+                if (colorFields[row, i] == secretColors[i])
+                    continue;
+
+                for (int j = 0; j < secretColors.Length; j++)
+                {
+                    if (!used[j] && colorFields[row, i] == secretColors[j])
+                    {
+                        incorrects++;
+                        used[j] = true;
+                        break;
+                    }
+                }
+            }
+
+            return (corrects, incorrects);
         }
     }
 }
