@@ -141,7 +141,7 @@ namespace GameGroupProject
             }
         }
 
-        static (int x, int y, int width, int height) PrintBorder(string? title, ConsoleColor titleColor, ConsoleColor borderColor, (int x, int y) position, (int x, int y) size, bool particles = false, bool animate = false)
+        static (int x, int y, int width, int height) PrintBorder(string title, ConsoleColor titleColor, ConsoleColor borderColor, (int x, int y) position, (int x, int y) size, bool particles = false, bool animate = false)
         {
             for (int y = 0; y <= size.y; y++)
             {
@@ -155,21 +155,20 @@ namespace GameGroupProject
                     else if (y == 0 || y == size.y) character = '─';
                     else if (x == 0 || x == size.x) character = '│';
 
-                    if (particles && random.NextDouble() <= 0.1 && x > 0 && x < size.x && y > 0 && y < size.y)
-                    {
-                        Console.ForegroundColor = ConsoleColor.DarkGray;
-                        character = '•';
-                    }
-                    Console.ForegroundColor = borderColor;
+                    bool spawnParticle = particles && random.NextDouble() <= 0.1 && x > 0 && x < size.x && y > 0 && y < size.y;
+                    if (spawnParticle) character = '•';
+
+                    Console.ForegroundColor = spawnParticle ? ConsoleColor.DarkGray : borderColor;
                     Console.SetCursorPosition(position.x + x, position.y + y);
                     Console.Write(character);
+                    Console.ResetColor();
                 }
                 if (animate) Thread.Sleep(50);
             }
             if (title != null)
             {
                 Console.ForegroundColor = titleColor;
-                Console.SetCursorPosition(position.x + (size.x - (title.Length + 2))/2, position.y);
+                Console.SetCursorPosition(position.x + (size.x - (title.Length + 2)) / 2, position.y);
                 Console.Write($" {title} ");
             }
             Console.ResetColor();
