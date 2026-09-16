@@ -3,6 +3,7 @@ using System.Text;
 
 namespace GameGroupProject
 {
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
     internal class Program
     {
         // In order for program to look good, font must be Consolas size 16, bold.
@@ -24,9 +25,9 @@ namespace GameGroupProject
         static int gridSizeY;
         static int bombs;
         static int bombsMinusFlags;
-        static char[,] grid;
-        static bool[,] isRevealed;
-        static bool[,] flagPlaced;
+        static char[,] grid = new char[,] { };
+        static bool[,] isRevealed = new bool[,] { };
+        static bool[,] flagPlaced = new bool[,] { };
         static Random random = new Random();
         static (int x, int y) cursor = (0,0);
         static bool timerIsRunning = false;
@@ -53,6 +54,7 @@ namespace GameGroupProject
         static bool MinesweeperMenu() // Returns true if the player starts the game, false if the player quits.
         {
             // Don't looks at this code pls :(
+            // I was rushing getting through the menu, so this is not good code, but at least it works...
             Console.SetWindowSize(35, 15);
             while (true)
             {
@@ -167,7 +169,7 @@ namespace GameGroupProject
                             
                             // This covers most edge cases of stupid user input. One comes to mind that remains, though. If the user inputs something like 0000000000001, this code will think it is above the integer maximum, and adjust accordingly. This is stupid of course, but the code to patch this edge case is too much effort for how niche it is.
                             int gridSizeXMax = (Console.LargestWindowWidth - 6) / 2;
-                            int gridSizeYMax = (Console.LargestWindowHeight - 2) / 2;
+                            int gridSizeYMax = (Console.LargestWindowHeight - 2);
                             gridSizeX = customValues[0].Length == 0 ? difficulties[0].gridSizeX : customValues[0].Length > int.MaxValue.ToString().Length - 1 ? gridSizeXMax : Math.Min(int.Parse(customValues[0]), gridSizeXMax);
                             gridSizeY = customValues[1].Length == 0 ? difficulties[0].gridSizeY : customValues[1].Length > int.MaxValue.ToString().Length - 1 ? gridSizeYMax : Math.Min(int.Parse(customValues[1]), gridSizeYMax);
                             bombs = customValues[2].Length == 0 ? difficulties[0].bombs : customValues[2].Length > int.MaxValue.ToString().Length - 1 ? gridSizeX * gridSizeY - 1 : Math.Min(int.Parse(customValues[2]), gridSizeX * gridSizeY - 1);
@@ -249,7 +251,7 @@ namespace GameGroupProject
             else if (type == 3)
             {
                 Console.SetCursorPosition(0, difficulties.Length * 2 + 3); // Custom difficulty
-                Console.Write(" Custom      ");
+                Console.Write(" Custom      "); // Extra spaces are there to erase the stuff that was printed on the line before
             }
             // Between 4 and difficulties.Length + 3 (inclusive)
             else if (type < difficulties.Length + 4) // Preset difficulties
@@ -685,6 +687,8 @@ namespace GameGroupProject
         static void UpdateGameTimer()
         {
             // ChatGPT helped me cook this up.
+            // I initially wanted to use a second thread to keep track of time, because I thought it would be simpler, it's just 1 variable to update on a fixed schedule after all.
+            // Doing that introduced major bugs because the thread was unsafe though. So I looked for a new solution and found the StopWatch which turns out to work perfectly for this task.
             if (!timerIsRunning) return;
 
             // GetTimeStamp returns time passed in ticks. Dividng by frequency effectively turns the time passed in ticks into time passed in seconds, because the frequency is the ticks per second.
