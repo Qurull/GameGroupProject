@@ -13,13 +13,14 @@ namespace HangMan
         static void HangMan() //Metoden som køre hangman spillet
         {
             Console.Clear(); //rydder konsollen for tekst
+            Console.Title = "Hangman"; //sætter titlen på konsollen til Hangman
             Console.WriteLine("Welcome to Hangman, what is the word?");//beder spilleren om at indtaste et ord som skal gættes
             
             string guessWord = Console.ReadLine();//læser ordet som spilleren indtaster
             Console.SetCursorPosition(0, Console.CursorTop - 1); //flytter cursoren op en linje
 
             StringBuilder hiddenWord = new StringBuilder(new string('_', guessWord.Length));//gemmer ordet som spilleren skal gætte
-            int life = 1;//antal forsøg spilleren har til at gætte
+            int life = 8;//antal forsøg spilleren har til at gætte
             if (guessWord.Contains(" "))
             {
                 for (int i = 0; i < guessWord.Length; i++)
@@ -61,6 +62,7 @@ namespace HangMan
                     else //hvis spilleren gættede forkert
                     {
                         life -= 1; //trækker et liv fra spilleren
+                        Console.Beep(1000, 500); //spiller en lyd når spilleren gætter forkert
                         Console.SetCursorPosition(0, Console.CursorTop - 12); //flytter cursoren op en linje
                         Console.WriteLine("That was wrong you have " + life + " lives left. What is the next letter?"); //beder spilleren om at gætte igen
                         DisplayHangman(life);
@@ -73,11 +75,15 @@ namespace HangMan
                 {
                     for (int i = 0; i < guessWord.Length; i++)//går igennem ordet som spilleren skal gætte
                     {
-                        if (guessWord[i].ToString().ToLower() == guess[0].ToString().ToLower())//hvis spilleren gætter rigtigt
-                        {
-                            hiddenWord[i] = guess[0];//gemmer det rigtige gæt i hiddenWord
+                        for (int j = 0; j < guess.Length; j++)//går igennem spilleren gæt)
+                        { 
+                            if (guessWord[i].ToString().ToLower() == guess[j].ToString().ToLower())
+                            {
+                            hiddenWord[i] = guess[j];//gemmer det rigtige gæt i hiddenWord
                             correctGuess = true;//sætter correctGuess til true
+                            }
                         }
+
                     }
 
                     if (correctGuess) //
@@ -91,6 +97,7 @@ namespace HangMan
                     else
                     {
                         life -= 2;
+                        Console.Beep(1000, 500); //spiller en lyd når spilleren gætter forkert
                         Console.SetCursorPosition(0, Console.CursorTop - 12); //flytter cursoren op en linje
                         Console.WriteLine("None of the letters match. You have " + life + " lives left. What is the next letter?"); //beder spilleren om at gætte igen
                         DisplayHangman(life);
@@ -101,7 +108,7 @@ namespace HangMan
                 
                 }
 
-                if (hiddenWord.ToString() == guessWord)
+                if (hiddenWord.ToString().ToLower() == guessWord.ToLower())
                 {
                     Console.WriteLine("You guessed the word!");
                     Console.WriteLine(hiddenWord.ToString());// viser hvor mange bogstaver der er i ordet dem som er belvet gætte
@@ -139,17 +146,27 @@ namespace HangMan
             {
                 string[] stages =
                 {
-                    // final state: head, torso, both arms, and both legs
+                    // final state: hele kroppen og boksen skuppes væk
                     @"
                           --------
                           |      |
-                          |      O
+                          |      💀
                           |     \|/
                           |      |
                           |     / \
-                          -
+                          -         [-]
                         ",
-                    // head, torso, both arms, and one leg
+                    // hoved, krop, begge arme og begge ben
+                    @"
+                          💴💴💴💴
+                          🚪      |
+                          🚪      O
+                          🚪   🫷👕🫸
+                          🚪     👖
+                          🚪     👞👞
+                         🧱🧱 🪜🪵🪵
+                        ",
+                    // hoved, krop, begge arme og et ben
                     @"
                           --------
                           |      |
@@ -157,9 +174,9 @@ namespace HangMan
                           |     \|/
                           |      |
                           |     / 
-                          -
+                          -     [-]
                         ",
-                    // head, torso, and both arms
+                    // hoved, krop og begge arme
                     @"
                           --------
                           |      |
@@ -167,9 +184,9 @@ namespace HangMan
                           |     \|/
                           |      |
                           |      
-                          -
+                          -     [-]
                         ",
-                    // head, torso, and one arm
+                    // hoved, krop og en arm
                     @"
                           --------
                           |      |
@@ -177,9 +194,9 @@ namespace HangMan
                           |     \|
                           |      |
                           |     
-                          -
+                          -     [-]
                         ",
-                    // head and torso
+                    // hoved og krop
                     @"
                           --------
                           |      |
@@ -187,9 +204,9 @@ namespace HangMan
                           |      |
                           |      |
                           |     
-                          -
+                          -     [-]
                         ",
-                    // head
+                    // hoved
                     @"
                           --------
                           |      |
@@ -197,9 +214,9 @@ namespace HangMan
                           |    
                           |      
                           |     
-                          -
+                          -     [-]
                         ",
-                    // poll
+                    // stolpe
                     @"
                           --------
                           |      |
@@ -207,10 +224,10 @@ namespace HangMan
                           |    
                           |      
                           |     
-                          -
+                          -     [-]
                         ",
                     
-                    // initial empty state
+                    // initial empty state bakke og boks
                     @"
                           
                                 
@@ -218,7 +235,7 @@ namespace HangMan
                               
                                 
                                
-                          -
+                          -     [-]
                         ",
                 };
 
