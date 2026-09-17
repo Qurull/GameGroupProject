@@ -185,6 +185,12 @@
                 {"Answer40", "Answer41", "Answer42", "Answer43", "Answer44" },
                 {"Answer50", "Answer51", "Answer52", "Answer53", "Answer54" }
             };
+
+            // daily doubles
+            Random random = new Random();
+
+            int dailyDoubleCategory = random.Next(0, 6);
+            int dailyDoubleClue = random.Next(0, 5);
             // end quiz content
 
             // decide who goes first
@@ -382,56 +388,82 @@
                 // display clue and make player answer
                 while (true)
                 {
-                    int buzzersLeft = BuzzersLeft(playerAllowed);
-
-                    if (buzzersLeft < 1)
-                    {
-                        Console.Clear();
-
-                        Console.WriteLine("Clue: ");
-                        Console.WriteLine(clues[categoryNumber, clueNumber]);
-                        Console.WriteLine("\n\nThe correct answer is: ");
-                        Console.WriteLine(answers[categoryNumber, clueNumber]);
-
-                        Console.WriteLine("\n\nPress any key to continue.");
-                        Console.ReadKey();
-                        break;
-                    }
-
-                    // display clue and ask for an answer
-                    Console.WriteLine(categories[categoryNumber] + " for " + chosenClue);
-                    Console.WriteLine(clues[categoryNumber, clueNumber]);
-
+                    // holds the player who is gonna answer the question
                     int fastestBuzz;
 
-                    if (buzzersLeft >= 2)
+                    if (categoryNumber == dailyDoubleCategory && clueNumber == dailyDoubleClue)
                     {
-                        fastestBuzz = BuzzIn(playerName, playerBuzzer, playerAllowed);
+                        fastestBuzz = clueChooser;
+
+                        Console.WriteLine("Daily Double!");
+
+                        // display clue and ask for an answer
+                        Console.WriteLine(categories[categoryNumber] + " for " + chosenClue);
+
+                        Console.ForegroundColor = playerColor[fastestBuzz];
+                        Console.Write(playerName[fastestBuzz]);
+                        Console.ResetColor();
+
+                        Console.WriteLine(", you get to make a wage.");
+
+                        int dailyDoubleWager = WagePoints(playerName[fastestBuzz], playerColor[fastestBuzz], playerPoints[fastestBuzz], clues.GetLength(1) * 2 * 100);
+
+                        Console.WriteLine(clues[categoryNumber, clueNumber]);
                     }
                     else
                     {
-                        fastestBuzz = LastBuzzer(playerAllowed);
+                        int buzzersLeft = BuzzersLeft(playerAllowed);
 
-                        if (amountOfPlayers > 1)
+                        if (buzzersLeft < 1)
                         {
-                            Console.ForegroundColor = playerColor[fastestBuzz];
-                            Console.Write(playerName[fastestBuzz]);
-                            Console.ResetColor();
-                            Console.WriteLine(", do you want to answer?");
+                            Console.Clear();
 
-                            Console.WriteLine("Press tab if no, press any other key if yes.");
+                            Console.WriteLine("Clue: ");
+                            Console.WriteLine(clues[categoryNumber, clueNumber]);
+                            Console.WriteLine("\n\nThe correct answer is: ");
+                            Console.WriteLine(answers[categoryNumber, clueNumber]);
 
-                            if (Console.ReadKey().Key == ConsoleKey.Tab)
+                            Console.WriteLine("\n\nPress any key to continue.");
+                            Console.ReadKey();
+                            break;
+                        }
+
+                        // display clue and ask for an answer
+                        Console.WriteLine(categories[categoryNumber] + " for " + chosenClue);
+                        Console.WriteLine(clues[categoryNumber, clueNumber]);
+
+
+
+                        if (buzzersLeft >= 2)
+                        {
+                            fastestBuzz = BuzzIn(playerName, playerBuzzer, playerAllowed);
+                        }
+                        else
+                        {
+                            fastestBuzz = LastBuzzer(playerAllowed);
+
+                            if (amountOfPlayers > 1)
                             {
-                                fastestBuzz = -1;
+                                Console.ForegroundColor = playerColor[fastestBuzz];
+                                Console.Write(playerName[fastestBuzz]);
+                                Console.ResetColor();
+                                Console.WriteLine(", do you want to answer?");
+
+                                Console.WriteLine("Press tab if no, press any other key if yes.");
+
+                                if (Console.ReadKey().Key == ConsoleKey.Tab)
+                                {
+                                    fastestBuzz = -1;
+                                }
                             }
+                        }
+
+                        if (fastestBuzz == -1)
+                        {
+                            break;
                         }
                     }
 
-                    if (fastestBuzz == -1)
-                    {
-                        break;
-                    }
 
 
                     // check if answer is correct
@@ -837,15 +869,15 @@
             }
         } // end show points method
 
-        static int WagePoints(string playerName, ConsoleColor playerColor, int playerPoints)
+        static int WagePoints(string playerName, ConsoleColor playerColor, int playerPoints, int mostPointsOnBoard = 0)
         {
             Console.ForegroundColor = playerColor;
             Console.Write(playerName);
             Console.ResetColor();
 
-            Console.WriteLine(", you have earned " + playerPoints + " points.");
+            Console.WriteLine(", you have earned " + playerPoints + " points at this point.");
 
-            int maxWager = playerPoints;
+            int maxWager = playerPoints > mostPointsOnBoard ? playerPoints : mostPointsOnBoard;
             Console.WriteLine("You can wager between 1 and " + maxWager + ".");
 
             Console.WriteLine("If your answer is correct, you will add the amount of points you wagered to your current score. \nIf your answer is incorrect, you will lose the amount of points you wagered.");
