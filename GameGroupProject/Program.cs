@@ -53,7 +53,7 @@ namespace HangMan
                     }
                     if (correctGuess)//hvis spilleren gættede rigtigt
                     {
-                        Console.SetCursorPosition(0, Console.CursorTop - 12); //flytter cursoren op en linje
+                        Console.Clear();
                         Console.WriteLine("Good guess! You have " + life + " lives left. What is the next letter?");//beder spilleren om at gætte igen
                         DisplayHangman(life);
                         Console.WriteLine(hiddenWord.ToString());// viser hvor mange bogstaver der er i ordet dem som er belvet gætte
@@ -61,9 +61,9 @@ namespace HangMan
                     }
                     else //hvis spilleren gættede forkert
                     {
+                        Console.Clear();
                         life -= 1; //trækker et liv fra spilleren
                         Console.Beep(1000, 500); //spiller en lyd når spilleren gætter forkert
-                        Console.SetCursorPosition(0, Console.CursorTop - 12); //flytter cursoren op en linje
                         Console.WriteLine("That was wrong you have " + life + " lives left. What is the next letter?"); //beder spilleren om at gætte igen
                         DisplayHangman(life);
                         Console.WriteLine(hiddenWord.ToString()); // viser hvor mange bogstaver der er i ordet dem som er belvet gætte
@@ -86,19 +86,19 @@ namespace HangMan
 
                     }
 
-                    if (correctGuess) //
+                    if (correctGuess) //hvis spilleren gættede rigtigt
                     {
-                        Console.SetCursorPosition(0, Console.CursorTop - 12); //flytter cursoren op en linje
+                        Console.Clear();
                         Console.WriteLine("Some of the letters match! You have " + life + " lives left. What is the next letter?");//beder spilleren om at gætte igen
                         DisplayHangman(life);
                         Console.WriteLine(hiddenWord.ToString());// viser hvor mange bogstaver der er i ordet dem som er belvet gætte
 
                     }
-                    else
+                    else //hvis spilleren gættede forkert
                     {
+                        Console.Clear();
                         life -= 2;
                         Console.Beep(1000, 500); //spiller en lyd når spilleren gætter forkert
-                        Console.SetCursorPosition(0, Console.CursorTop - 12); //flytter cursoren op en linje
                         Console.WriteLine("None of the letters match. You have " + life + " lives left. What is the next letter?"); //beder spilleren om at gætte igen
                         DisplayHangman(life);
                         Console.WriteLine(hiddenWord.ToString()); // viser hvor mange bogstaver der er i ordet dem som er belvet gætte
@@ -108,7 +108,7 @@ namespace HangMan
                 
                 }
 
-                if (hiddenWord.ToString().ToLower() == guessWord.ToLower())
+                if (hiddenWord.ToString().ToLower() == guessWord.ToLower()) //hvis spilleren har gættet ordet
                 {
                     Console.WriteLine("You guessed the word!");
                     Console.WriteLine(hiddenWord.ToString());// viser hvor mange bogstaver der er i ordet dem som er belvet gætte
@@ -118,13 +118,13 @@ namespace HangMan
                     {
                         HangMan();
                     }
-                    else if (playAgain.ToLower() == "n")
+                    else if (playAgain.ToLower() == "n") // hvis spilleren ikke vil spille igen og vil tilbage til menuen
                     {
                         Console.WriteLine("Thanks for playing!");
                         break;
                     }
                 }
-                else if (life <= 0)
+                else if (life <= 0) //hvis spilleren har mistet alle liv
                 {
                     Console.WriteLine("You ran out of lives!");
                     Console.WriteLine("The word was: " + guessWord);
@@ -134,7 +134,7 @@ namespace HangMan
                     {
                         HangMan();
                     }
-                    else if (playAgain.ToLower() == "n")
+                    else if (playAgain.ToLower() == "n") //hvis spilleren ikke vil spille igen og vil tilbage til menuen
                     {
                         Console.WriteLine("Thanks for playing!");
                         break;
@@ -142,100 +142,100 @@ namespace HangMan
                 }
             }
 
-            static void DisplayHangman(int life)
+            static void DisplayHangman(int life) //metoden som viser tegner den hangman som spilleren har gættet forkert
             {
                 string[] stages =
                 {
                     // final state: hele kroppen og boksen skuppes væk
                     @"
-                          --------
-                          |      |
-                          |      💀
-                          |     \|/
-                          |      |
-                          |     / \
-                          -         [-]
+             💴💴💴💴💴
+             🚪       |
+             🚪       💀
+             🚪      \👕/
+             🚪       👖
+             🚪       / \
+            🧱🧱   🪜    [--]
                         ",
                     // hoved, krop, begge arme og begge ben
                     @"
-                          💴💴💴💴
-                          🚪      |
-                          🚪      O
-                          🚪   🫷👕🫸
-                          🚪     👖
-                          🚪     👞👞
-                         🧱🧱 🪜🪵🪵
+             💴💴💴💴💴
+             🚪       |
+             🚪       😱
+             🚪      \👕/
+             🚪       👖
+             🚪       / \
+            🧱🧱   🪜[--]
                         ",
                     // hoved, krop, begge arme og et ben
                     @"
-                          --------
-                          |      |
-                          |      O
-                          |     \|/
-                          |      |
-                          |     / 
-                          -     [-]
+             💴💴💴💴💴
+             🚪       |
+             🚪       😨
+             🚪      \👕/
+             🚪       👖
+             🚪       / 
+            🧱🧱   🪜[--]
                         ",
                     // hoved, krop og begge arme
                     @"
-                          --------
-                          |      |
-                          |      O
-                          |     \|/
-                          |      |
-                          |      
-                          -     [-]
+             💴💴💴💴💴
+             🚪       |
+             🚪       😧
+             🚪      \👕/
+             🚪       👖
+             🚪      
+            🧱🧱   🪜[--]
                         ",
                     // hoved, krop og en arm
                     @"
-                          --------
-                          |      |
-                          |      O
-                          |     \|
-                          |      |
-                          |     
-                          -     [-]
+             💴💴💴💴💴
+             🚪        |
+             🚪        😦
+             🚪       \👕
+             🚪        👖
+             🚪      
+            🧱🧱    🪜[--]
                         ",
                     // hoved og krop
                     @"
-                          --------
-                          |      |
-                          |      O
-                          |      |
-                          |      |
-                          |     
-                          -     [-]
+             💴💴💴💴💴
+             🚪        |
+             🚪        🙁
+             🚪        👕
+             🚪        👖
+             🚪      
+            🧱🧱    🪜[--]
                         ",
                     // hoved
                     @"
-                          --------
-                          |      |
-                          |      O
-                          |    
-                          |      
-                          |     
-                          -     [-]
+             💴💴💴💴💴
+             🚪        |
+             🚪        😐
+             🚪     
+             🚪     
+             🚪     
+            🧱🧱    🪜[--]
                         ",
                     // stolpe
                     @"
-                          --------
-                          |      |
-                          |      
-                          |    
-                          |      
-                          |     
-                          -     [-]
+             💴💴💴💴💴
+             🚪        |
+             🚪      
+             🚪     
+             🚪      
+             🚪      
+            🧱🧱    🪜[--]
                         ",
                     
                     // initial empty state bakke og boks
                     @"
                           
-                                
-                                
-                              
-                                
-                               
-                          -     [-]
+                          
+                          
+                          
+                          
+                          
+            🧱🧱    🪜[--]
                         ",
                 };
 
