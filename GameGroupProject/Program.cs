@@ -7,174 +7,185 @@ namespace GameGroupProject
     {
         static readonly Random random = new();
 
-        static readonly string[] gameItems = ["Hangman", "MineSweeper", "Jeopardy", "MasterMind"];
-
-        static readonly ConsoleColor[] colors = [ConsoleColor.Red, ConsoleColor.Green, ConsoleColor.Blue, ConsoleColor.Cyan, ConsoleColor.Magenta, ConsoleColor.Yellow];
-
-        static readonly ConsoleColor[] darkColors = [ConsoleColor.DarkRed, ConsoleColor.DarkGreen, ConsoleColor.DarkBlue, ConsoleColor.DarkCyan, ConsoleColor.DarkMagenta, ConsoleColor.DarkYellow, ConsoleColor.DarkGray];
-       
-        static readonly char[] chars = ['●', '○', '◆', '◈', '◇', '×', '◻', '◼'];
-
         static void Main(string[] args)
         {
             Console.OutputEncoding = Encoding.UTF8;
+            StartMainMenu();
+        }
+
+        static void StartMainMenu()
+        {
+            ConsoleColor[] colors = [ConsoleColor.Red, ConsoleColor.Green, ConsoleColor.Blue, ConsoleColor.Cyan, ConsoleColor.Magenta, ConsoleColor.Yellow];
+            ConsoleColor[] darkColors = [ConsoleColor.DarkRed, ConsoleColor.DarkGreen, ConsoleColor.DarkBlue, ConsoleColor.DarkCyan, ConsoleColor.DarkMagenta, ConsoleColor.DarkYellow, ConsoleColor.DarkGray];
+
+            string[] gameItems = ["Hangman", "MineSweeper", "Jeopardy", "MasterMind"];
+            char[] chars = ['●', '○', '◆', '◈', '◇', '×', '◻', '◼'];
+
             PrintMainMenu();
-            Console.ReadKey(true);
-        }
 
-        static void PrintMainMenu()
-        {
-            Console.Title = "Arcade";
-            Console.CursorVisible = false;
-
-            PrintBackground();
-            PrintGameTitle("Welcome to Arcade!", (Console.WindowWidth/2 - 24, 3), (16, 7));
-            int selectedGame = PrintGameMenu(0, (0, Console.WindowHeight/2));
-            PrintGameLoading($"Loading {gameItems[selectedGame]}");
-
-            if (selectedGame == 0)
-                return;
-            else if (selectedGame == 1)
-                LoadMineSweeper();
-            else if (selectedGame == 2)
-                return;
-            else if (selectedGame == 3)
-                LoadMasterMind();
-        }
-
-        static void PrintBackground()
-        {
-            for (int y = 0; y < Console.WindowHeight; y++)
+            void PrintMainMenu()
             {
-                for (int x = 0; x < Console.WindowWidth; x++)
+                while (true)
                 {
-                    if (random.NextDouble() > 0.05) 
-                        continue;
-                    Console.ForegroundColor = darkColors[random.Next(darkColors.Length)];
-                    Console.SetCursorPosition(x, y);
-                    Console.Write(chars[random.Next(chars.Length)]);
-                    Console.ResetColor();
+                    Console.Clear();
+                    Console.Title = "Arcade";
+                    Console.CursorVisible = false;
+                    Console.SetWindowSize(120, 30);
+                    Console.SetCursorPosition(0, 0);
+
+                    PrintBackground();
+                    PrintGameTitle("Welcome to Arcade!", (Console.WindowWidth / 2 - 24, 3), (16, 7));
+                    int selectedGame = PrintGameMenu(0, (0, Console.WindowHeight / 2));
+                    PrintGameLoading($"Loading {gameItems[selectedGame]}");
+
+                    Console.Clear();
+                    Console.Title = $"Arcade - {gameItems[selectedGame]}";
+
+                    if (selectedGame == 0)
+                        LoadHangMan();
+                    else if (selectedGame == 1)
+                        LoadMineSweeper();
+                    else if (selectedGame == 2)
+                        return;
+                    else if (selectedGame == 3)
+                        LoadMasterMind();
                 }
             }
-        }
 
-        static void PrintGameTitle(string text, (int x, int y) position, (int x, int y) size)
-        {
-            for (int y = 0; y <= size.y; y++)
+            void PrintBackground()
             {
-                for (int x = 0; x <= size.x; x++)
+                for (int y = 0; y < Console.WindowHeight; y++)
                 {
-                    char character = ' ';
-                    if (x == 0 || x == size.x || y == 0 || y == size.y)
-                        character = chars[random.Next(chars.Length)];
-
-                    Console.ForegroundColor = colors[random.Next(colors.Length)];
-                    Console.SetCursorPosition(position.x + x * 3, position.y + y);
-                    Console.Write(character + "  ");
-                    Console.ResetColor();
+                    for (int x = 0; x < Console.WindowWidth; x++)
+                    {
+                        if (random.NextDouble() > 0.05)
+                            continue;
+                        Console.ForegroundColor = darkColors[random.Next(darkColors.Length)];
+                        Console.SetCursorPosition(x, y);
+                        Console.Write(chars[random.Next(chars.Length)]);
+                        Console.ResetColor();
+                    }
                 }
-                Thread.Sleep(100);
-            }
-            Console.ForegroundColor = ConsoleColor.White;
-            for (int i = 0; i < text.Length; i++)
-            {
-                Console.SetCursorPosition(position.x + (size.x * 2 - text.Length)/2 + i*2, position.y + size.y/2 + i % 2);
-                Console.Write(text[i]);
-                Thread.Sleep(50);
-            }
-            Console.ResetColor();
-        }
-
-        static int PrintGameMenu(int index, (int x, int y) position)
-        {
-            const int cardWidth = 16;
-            const int spacing = 2;
-
-            int totalWidth = gameItems.Length * cardWidth + (gameItems.Length - 1) * spacing;
-            int startX = (Console.WindowWidth - totalWidth) / 2;
-            int selectedItem = index;
-
-            for (int i = 0; i < gameItems.Length; i++)
-                PrintGameItem(i, selectedItem == i);
-
-            while (true)
-            {
-                int previousItem = selectedItem;
-                ConsoleKeyInfo keyInfo = Console.ReadKey(true);
-
-                if (keyInfo.Key == ConsoleKey.LeftArrow)
-                    selectedItem = selectedItem > 0 ? selectedItem - 1 : gameItems.Length - 1;
-                else if (keyInfo.Key == ConsoleKey.RightArrow)
-                    selectedItem = (selectedItem + 1) % gameItems.Length;
-                else if (keyInfo.Key == ConsoleKey.Enter)
-                    break;
-
-                PrintGameItem(previousItem, false);
-                PrintGameItem(selectedItem, true);
             }
 
-            void PrintGameItem(int index, bool selected)
+            void PrintGameTitle(string text, (int x, int y) position, (int x, int y) size)
             {
-                string item = gameItems[index];
-                int x = startX + index * (cardWidth + spacing);
+                for (int y = 0; y <= size.y; y++)
+                {
+                    for (int x = 0; x <= size.x; x++)
+                    {
+                        char character = ' ';
+                        if (x == 0 || x == size.x || y == 0 || y == size.y)
+                            character = chars[random.Next(chars.Length)];
 
-                ConsoleColor color = selected ? colors[random.Next(colors.Length - 1)] : ConsoleColor.DarkGray;
-                (int x, int y, int width, int height) gameItem = PrintBorder(null, color, color, (position.x + x, position.y + index % 2), (cardWidth, 4));
-                
-                Console.SetCursorPosition(x + (gameItem.width - item.Length) / 2 + 1, gameItem.y + gameItem.height / 2);
-                Console.ForegroundColor = color;
-                Console.WriteLine(item);
+                        Console.ForegroundColor = colors[random.Next(colors.Length)];
+                        Console.SetCursorPosition(position.x + x * 3, position.y + y);
+                        Console.Write(character + "  ");
+                        Console.ResetColor();
+                    }
+                    Thread.Sleep(100);
+                }
+                Console.ForegroundColor = ConsoleColor.White;
+                for (int i = 0; i < text.Length; i++)
+                {
+                    Console.SetCursorPosition(position.x + (size.x * 2 - text.Length) / 2 + i * 2, position.y + size.y / 2 + i % 2);
+                    Console.Write(text[i]);
+                    Thread.Sleep(50);
+                }
                 Console.ResetColor();
             }
 
-            return selectedItem;
-        }
-
-        static void PrintGameLoading(string text)
-        {
-            Console.Clear();
-            PrintBackground();
-            for (int i = 0; i < 12; i++)
+            int PrintGameMenu(int index, (int x, int y) position)
             {
-                Console.SetCursorPosition((Console.WindowWidth - text.Length - 3)/2, Console.WindowHeight/2);
-                Console.Write($"{text}{new('.', i % 4)}   ");
-                Thread.Sleep(200);
-            }
-        }
+                const int cardWidth = 16;
+                const int spacing = 2;
 
-        static (int x, int y, int width, int height) PrintBorder(string? title, ConsoleColor titleColor, ConsoleColor borderColor, (int x, int y) position, (int x, int y) size, bool particles = false, bool animate = false)
-        {
-            for (int y = 0; y <= size.y; y++)
-            {
-                for (int x = 0; x <= size.x; x++)
+                int totalWidth = gameItems.Length * cardWidth + (gameItems.Length - 1) * spacing;
+                int startX = (Console.WindowWidth - totalWidth) / 2;
+                int selectedItem = index;
+
+                for (int i = 0; i < gameItems.Length; i++)
+                    PrintGameItem(i, selectedItem == i);
+
+                while (true)
                 {
-                    char character = ' ';
-                    if (x == 0 && y == 0) character = '┌';
-                    else if (x == size.x && y == 0) character = '┐';
-                    else if (x == 0 && y == size.y) character = '└';
-                    else if (x == size.x && y == size.y) character = '┘';
-                    else if (y == 0 || y == size.y) character = '─';
-                    else if (x == 0 || x == size.x) character = '│';
+                    int previousItem = selectedItem;
+                    ConsoleKeyInfo keyInfo = Console.ReadKey(true);
 
-                    bool spawnParticle = particles && random.NextDouble() <= 0.1 && x > 0 && x < size.x && y > 0 && y < size.y;
-                    if (spawnParticle) character = '•';
+                    if (keyInfo.Key == ConsoleKey.LeftArrow)
+                        selectedItem = selectedItem > 0 ? selectedItem - 1 : gameItems.Length - 1;
+                    else if (keyInfo.Key == ConsoleKey.RightArrow)
+                        selectedItem = (selectedItem + 1) % gameItems.Length;
+                    else if (keyInfo.Key == ConsoleKey.Enter)
+                        break;
 
-                    Console.ForegroundColor = spawnParticle ? ConsoleColor.DarkGray : borderColor;
-                    Console.SetCursorPosition(position.x + x, position.y + y);
-                    Console.Write(character);
+                    PrintGameItem(previousItem, false);
+                    PrintGameItem(selectedItem, true);
+                }
+
+                void PrintGameItem(int index, bool selected)
+                {
+                    string item = gameItems[index];
+                    int x = startX + index * (cardWidth + spacing);
+
+                    ConsoleColor color = selected ? colors[random.Next(colors.Length - 1)] : ConsoleColor.DarkGray;
+                    (int x, int y, int width, int height) gameItem = PrintBorder(null, color, color, (position.x + x, position.y + index % 2), (cardWidth, 4));
+
+                    Console.SetCursorPosition(x + (gameItem.width - item.Length) / 2 + 1, gameItem.y + gameItem.height / 2);
+                    Console.ForegroundColor = color;
+                    Console.WriteLine(item);
                     Console.ResetColor();
                 }
-                if (animate) Thread.Sleep(50);
-            }
-            if (title != null)
-            {
-                Console.ForegroundColor = titleColor;
-                Console.SetCursorPosition(position.x + (size.x - (title.Length + 2)) / 2, position.y);
-                Console.Write($" {title} ");
-            }
-            Console.ResetColor();
 
-            return (position.x, position.y, size.x, size.y);
+                return selectedItem;
+            }
+
+            void PrintGameLoading(string text)
+            {
+                Console.Clear();
+                PrintBackground();
+                for (int i = 0; i < 12; i++)
+                {
+                    Console.SetCursorPosition((Console.WindowWidth - text.Length - 3) / 2, Console.WindowHeight / 2);
+                    Console.Write($"{text}{new('.', i % 4)}   ");
+                    Thread.Sleep(200);
+                }
+            }
+
+            (int x, int y, int width, int height) PrintBorder(string? title, ConsoleColor titleColor, ConsoleColor borderColor, (int x, int y) position, (int x, int y) size, bool particles = false, bool animate = false)
+            {
+                for (int y = 0; y <= size.y; y++)
+                {
+                    for (int x = 0; x <= size.x; x++)
+                    {
+                        char character = ' ';
+                        if (x == 0 && y == 0) character = '┌';
+                        else if (x == size.x && y == 0) character = '┐';
+                        else if (x == 0 && y == size.y) character = '└';
+                        else if (x == size.x && y == size.y) character = '┘';
+                        else if (y == 0 || y == size.y) character = '─';
+                        else if (x == 0 || x == size.x) character = '│';
+
+                        bool spawnParticle = particles && random.NextDouble() <= 0.1 && x > 0 && x < size.x && y > 0 && y < size.y;
+                        if (spawnParticle) character = '•';
+
+                        Console.ForegroundColor = spawnParticle ? ConsoleColor.DarkGray : borderColor;
+                        Console.SetCursorPosition(position.x + x, position.y + y);
+                        Console.Write(character);
+                        Console.ResetColor();
+                    }
+                    if (animate) Thread.Sleep(50);
+                }
+                if (title != null)
+                {
+                    Console.ForegroundColor = titleColor;
+                    Console.SetCursorPosition(position.x + (size.x - (title.Length + 2)) / 2, position.y);
+                    Console.Write($" {title} ");
+                }
+                Console.ResetColor();
+
+                return (position.x, position.y, size.x, size.y);
+            }
         }
 
         static void LoadMasterMind()
@@ -195,12 +206,11 @@ namespace GameGroupProject
             int selectedRow, selectedCol;
             bool playerWon = false;
 
-            LoadMasterMind((2, 1));
+            PrintMasterMindMenu((2, 1));
 
-            void LoadMasterMind((int x, int y) position)
+            void PrintMasterMindMenu((int x, int y) position)
             {
                 Console.Clear();
-                Console.Title = "MasterMind";
                 Console.CursorVisible = false;
 
                 (int x, int y, int width, int height) border = PrintBorder("MasterMind", possibleColors[random.Next(possibleColors.Length)], ConsoleColor.White, position, (26, 12), true, true);
@@ -279,7 +289,7 @@ namespace GameGroupProject
                 }
 
                 Console.Beep(BEEP_FREQUENCY, BEEP_DURATION);
-                LoadMasterMind((2, 1));
+                PrintMasterMindMenu((2, 1));
             }
 
             void StartGame((int x, int y) position)
@@ -480,7 +490,7 @@ namespace GameGroupProject
                 if (selectedItem == 0)
                     StartGame((2, 1));
                 else if (selectedItem == 1)
-                    LoadMasterMind((2, 1));
+                    PrintMasterMindMenu((2, 1));
             }
 
             void PlaceColor(ConsoleColor color, (int x, int y) position)
@@ -567,7 +577,6 @@ namespace GameGroupProject
 
             Console.Clear();
             Console.CursorVisible = false;
-            Console.OutputEncoding = Encoding.UTF8;
 
             while (MinesweeperMenu())
             {
@@ -1240,6 +1249,235 @@ namespace GameGroupProject
                 gridGenerated = false;
                 timerIsRunning = false;
                 currentSmiley = ":)";
+            }
+        }
+
+        static void LoadHangMan() //Metoden som køre hangman spillet
+        {
+            Console.Clear(); //rydder konsollen for tekst
+            Console.WriteLine("Welcome to Hangman, what is the word?");//beder spilleren om at indtaste et ord som skal gættes
+
+            string guessWord = Console.ReadLine();//læser ordet som spilleren indtaster
+            Console.SetCursorPosition(0, Console.CursorTop - 1); //flytter cursoren op en linje
+
+            StringBuilder hiddenWord = new StringBuilder(new string('_', guessWord.Length));//gemmer ordet som spilleren skal gætte
+            int life = 8;//antal forsøg spilleren har til at gætte
+            if (guessWord.Contains(" "))
+            {
+                for (int i = 0; i < guessWord.Length; i++)
+                {
+                    if (guessWord[i] == ' ')
+                    {
+                        hiddenWord[i] = ' ';
+                    }
+                }
+            }
+
+            Console.WriteLine("Guess the word, you have " + life + " tries.");//beder spilleren om at gætte ordet
+            DisplayHangman(life);
+            Console.WriteLine(hiddenWord.ToString());//viser spilleren hvor mange bogstaver der er i ordet som skal gættes
+
+            while (life > 0) //så længe spilleren har liv tilbage køre spillet
+            {
+                bool correctGuess = false; //variabel som holder styr på om spilleren har gættet rigtigt
+                string guess = Console.ReadLine();//læser spilleren gæt
+
+                if (guess.Length == 1)//hvis spilleren gætter et bogstav
+                {
+                    for (int i = 0; i < guessWord.Length; i++)//går igennem ordet som spilleren skal gætte
+                    {
+                        if (guessWord[i].ToString().ToLower() == guess[0].ToString().ToLower())//hvis spilleren gætter rigtigt
+                        {
+                            hiddenWord[i] = guess[0];//gemmer det rigtige gæt i hiddenWord
+                            correctGuess = true;//sætter correctGuess til true
+                        }
+                    }
+                    if (correctGuess)//hvis spilleren gættede rigtigt
+                    {
+                        Console.Clear();
+                        Console.WriteLine("Good guess! You have " + life + " lives left. What is the next letter?");//beder spilleren om at gætte igen
+                        DisplayHangman(life);
+                        Console.WriteLine(hiddenWord.ToString());// viser hvor mange bogstaver der er i ordet dem som er belvet gætte
+
+                    }
+                    else //hvis spilleren gættede forkert
+                    {
+                        Console.Clear();
+                        life -= 1; //trækker et liv fra spilleren
+                        Console.Beep(1000, 500); //spiller en lyd når spilleren gætter forkert
+                        Console.WriteLine("That was wrong you have " + life + " lives left. What is the next letter?"); //beder spilleren om at gætte igen
+                        DisplayHangman(life);
+                        Console.WriteLine(hiddenWord.ToString()); // viser hvor mange bogstaver der er i ordet dem som er belvet gætte
+
+                    }
+                }
+
+                else if (guess.Length >= 1) //hvis spilleren gætter et ord
+                {
+                    for (int i = 0; i < guessWord.Length; i++)//går igennem ordet som spilleren skal gætte
+                    {
+                        for (int j = 0; j < guess.Length; j++)//går igennem spilleren gæt)
+                        {
+                            if (guessWord[i].ToString().ToLower() == guess[j].ToString().ToLower())
+                            {
+                                hiddenWord[i] = guess[j];//gemmer det rigtige gæt i hiddenWord
+                                correctGuess = true;//sætter correctGuess til true
+                            }
+                        }
+
+                    }
+
+                    if (correctGuess) //hvis spilleren gættede rigtigt
+                    {
+                        Console.Clear();
+                        Console.WriteLine("Some of the letters match! You have " + life + " lives left. What is the next letter?");//beder spilleren om at gætte igen
+                        DisplayHangman(life);
+                        Console.WriteLine(hiddenWord.ToString());// viser hvor mange bogstaver der er i ordet dem som er belvet gætte
+
+                    }
+                    else //hvis spilleren gættede forkert
+                    {
+                        Console.Clear();
+                        life -= 2;
+                        Console.Beep(1000, 500); //spiller en lyd når spilleren gætter forkert
+                        Console.WriteLine("None of the letters match. You have " + life + " lives left. What is the next letter?"); //beder spilleren om at gætte igen
+                        DisplayHangman(life);
+                        Console.WriteLine(hiddenWord.ToString()); // viser hvor mange bogstaver der er i ordet dem som er belvet gætte
+                    }
+                }
+
+                if (hiddenWord.ToString().ToLower() == guessWord.ToLower()) //hvis spilleren har gættet ordet
+                {
+                    Console.WriteLine("You guessed the word!");
+                    Console.WriteLine(hiddenWord.ToString());// viser hvor mange bogstaver der er i ordet dem som er belvet gætte
+                    Console.WriteLine("want to play again? press y for yes or n for no");
+                    string playAgain = Console.ReadLine();
+                    if (playAgain.ToLower() == "y")
+                    {
+                        LoadHangMan();
+                    }
+                    else if (playAgain.ToLower() == "n") // hvis spilleren ikke vil spille igen og vil tilbage til menuen
+                    {
+                        Console.WriteLine("Thanks for playing!");
+                        break;
+                    }
+                }
+                else if (life <= 0) //hvis spilleren har mistet alle liv
+                {
+                    Console.WriteLine("You ran out of lives!");
+                    Console.WriteLine("The word was: " + guessWord);
+                    Console.WriteLine("want to play again? press y for yes or n for no");
+                    string playAgain = Console.ReadLine();
+                    if (playAgain.ToLower() == "y")
+                    {
+                        LoadHangMan();
+                    }
+                    else if (playAgain.ToLower() == "n") //hvis spilleren ikke vil spille igen og vil tilbage til menuen
+                    {
+                        Console.WriteLine("Thanks for playing!");
+                        break;
+                    }
+                }
+            }
+
+            void DisplayHangman(int life) //metoden som viser tegner den hangman som spilleren har gættet forkert
+            {
+                string[] stages =
+                {
+                    // final state: hele kroppen og boksen skuppes væk
+                    @"
+                     💴💴💴💴💴
+                     🚪       |
+                     🚪       💀
+                     🚪      \👕/
+                     🚪       👖
+                     🚪       / \
+                    🧱🧱   🪜    [--]
+                    ",
+                    // hoved, krop, begge arme og begge ben
+                    @"
+                     💴💴💴💴💴
+                     🚪       |
+                     🚪       😱
+                     🚪      \👕/
+                     🚪       👖
+                     🚪       / \
+                    🧱🧱   🪜[--]
+                    ",
+                    // hoved, krop, begge arme og et ben
+                    @"
+                     💴💴💴💴💴
+                     🚪       |
+                     🚪       😨
+                     🚪      \👕/
+                     🚪       👖
+                     🚪       / 
+                    🧱🧱   🪜[--]
+                    ",
+                    // hoved, krop og begge arme
+                    @"
+                     💴💴💴💴💴
+                     🚪       |
+                     🚪       😧
+                     🚪      \👕/
+                     🚪       👖
+                     🚪      
+                    🧱🧱   🪜[--]
+                    ",
+                    // hoved, krop og en arm
+                    @"
+                     💴💴💴💴💴
+                     🚪        |
+                     🚪        😦
+                     🚪       \👕
+                     🚪        👖
+                     🚪      
+                    🧱🧱    🪜[--]
+                    ",
+                    // hoved og krop
+                    @"
+                     💴💴💴💴💴
+                     🚪        |
+                     🚪        🙁
+                     🚪        👕
+                     🚪        👖
+                     🚪      
+                    🧱🧱    🪜[--]
+                    ",
+                    // hoved
+                    @"
+                     💴💴💴💴💴
+                     🚪        |
+                     🚪        😐
+                     🚪     
+                     🚪     
+                     🚪     
+                    🧱🧱    🪜[--]
+                    ",
+                    // stolpe
+                    @"
+                     💴💴💴💴💴
+                     🚪        |
+                     🚪      
+                     🚪     
+                     🚪      
+                     🚪      
+                    🧱🧱    🪜[--]
+                    ",
+                    
+                    // initial empty state bakke og boks
+                    @"
+                          
+                          
+                          
+                          
+                          
+                          
+                    🧱🧱    🪜[--]
+                    ",
+                };
+
+                Console.WriteLine(stages[life]);
             }
         }
     }
