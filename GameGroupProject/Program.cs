@@ -142,7 +142,7 @@ namespace GameGroupProject
                             while (key.Key != ConsoleKey.Escape && key.Key != ConsoleKey.Enter && key.Key != ConsoleKey.Spacebar)
                             {
                                 PrintMenuItem(selectedIndex, false, customValues[selectedIndex - newZero]);
-                                int keyInt = (int)key.Key;
+                                int keyInt = (int)key.KeyChar;
                                 if (key.Key == ConsoleKey.UpArrow || key.Key == ConsoleKey.W)
                                 {
                                     selectedIndex--;
