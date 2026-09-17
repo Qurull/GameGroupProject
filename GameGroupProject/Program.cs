@@ -1252,23 +1252,24 @@ namespace GameGroupProject
             }
         }
 
-        static void LoadHangMan() //Metoden som køre hangman spillet
+        static void LoadHangMan()
         {
             Console.Clear(); //rydder konsollen for tekst
+            Console.CursorVisible = true;
             Console.WriteLine("Welcome to Hangman, what is the word?");//beder spilleren om at indtaste et ord som skal gættes
 
-            string guessWord = Console.ReadLine();//læser ordet som spilleren indtaster
+            string guessWord = Console.ReadLine() ?? "";//læser ordet som spilleren indtaster
             Console.SetCursorPosition(0, Console.CursorTop - 1); //flytter cursoren op en linje
 
             StringBuilder hiddenWord = new StringBuilder(new string('_', guessWord.Length));//gemmer ordet som spilleren skal gætte
             int life = 8;//antal forsøg spilleren har til at gætte
             if (guessWord.Contains(" "))
             {
-                for (int i = 0; i < guessWord.Length; i++)
+                for (int i = 0; i < guessWord.Length; i++) //går igennem ordet som spilleren skal gætte
                 {
-                    if (guessWord[i] == ' ')
+                    if (guessWord[i] == ' ') //hvis der er et mellemrum i ordet som spilleren skal gætte
                     {
-                        hiddenWord[i] = ' ';
+                        hiddenWord[i] = ' ';//gemmer mellemrum i hiddenWord
                     }
                 }
             }
@@ -1280,7 +1281,7 @@ namespace GameGroupProject
             while (life > 0) //så længe spilleren har liv tilbage køre spillet
             {
                 bool correctGuess = false; //variabel som holder styr på om spilleren har gættet rigtigt
-                string guess = Console.ReadLine();//læser spilleren gæt
+                string guess = Console.ReadLine() ?? "";//læser spilleren gæt
 
                 if (guess.Length == 1)//hvis spilleren gætter et bogstav
                 {
@@ -1298,16 +1299,15 @@ namespace GameGroupProject
                         Console.WriteLine("Good guess! You have " + life + " lives left. What is the next letter?");//beder spilleren om at gætte igen
                         DisplayHangman(life);
                         Console.WriteLine(hiddenWord.ToString());// viser hvor mange bogstaver der er i ordet dem som er belvet gætte
-
                     }
                     else //hvis spilleren gættede forkert
                     {
-                        Console.Clear();
                         life -= 1; //trækker et liv fra spilleren
-                        Console.Beep(1000, 500); //spiller en lyd når spilleren gætter forkert
+                        Console.Clear();
                         Console.WriteLine("That was wrong you have " + life + " lives left. What is the next letter?"); //beder spilleren om at gætte igen
                         DisplayHangman(life);
                         Console.WriteLine(hiddenWord.ToString()); // viser hvor mange bogstaver der er i ordet dem som er belvet gætte
+                        Console.Beep(1000, 500); //spiller en lyd når spilleren gætter forkert
 
                     }
                 }
@@ -1337,13 +1337,14 @@ namespace GameGroupProject
                     }
                     else //hvis spilleren gættede forkert
                     {
+                        life -= 1;
                         Console.Clear();
-                        life -= 2;
-                        Console.Beep(1000, 500); //spiller en lyd når spilleren gætter forkert
                         Console.WriteLine("None of the letters match. You have " + life + " lives left. What is the next letter?"); //beder spilleren om at gætte igen
                         DisplayHangman(life);
-                        Console.WriteLine(hiddenWord.ToString()); // viser hvor mange bogstaver der er i ordet dem som er belvet gætte
+                        Console.WriteLine(hiddenWord.ToString()); // viser hvor mange bogstaver der er i ordet dem som er belvet
+                        Console.Beep(1000, 500); //spiller en lyd når spilleren gætter forkert
                     }
+
                 }
 
                 if (hiddenWord.ToString().ToLower() == guessWord.ToLower()) //hvis spilleren har gættet ordet
@@ -1351,7 +1352,7 @@ namespace GameGroupProject
                     Console.WriteLine("You guessed the word!");
                     Console.WriteLine(hiddenWord.ToString());// viser hvor mange bogstaver der er i ordet dem som er belvet gætte
                     Console.WriteLine("want to play again? press y for yes or n for no");
-                    string playAgain = Console.ReadLine();
+                    string playAgain = Console.ReadLine() ?? "";
                     if (playAgain.ToLower() == "y")
                     {
                         LoadHangMan();
@@ -1367,7 +1368,7 @@ namespace GameGroupProject
                     Console.WriteLine("You ran out of lives!");
                     Console.WriteLine("The word was: " + guessWord);
                     Console.WriteLine("want to play again? press y for yes or n for no");
-                    string playAgain = Console.ReadLine();
+                    string playAgain = Console.ReadLine() ?? "";
                     if (playAgain.ToLower() == "y")
                     {
                         LoadHangMan();
@@ -1386,83 +1387,83 @@ namespace GameGroupProject
                 {
                     // final state: hele kroppen og boksen skuppes væk
                     @"
-                     💴💴💴💴💴
-                     🚪       |
-                     🚪       💀
-                     🚪      \👕/
-                     🚪       👖
-                     🚪       / \
-                    🧱🧱   🪜    [--]
+             💴💴💴💴💴
+             🚪        |
+             🚪        💀
+             🚪       \👕/
+             🚪        👖
+             🚪        / \
+            🧱🧱    🪜    [--]
                     ",
                     // hoved, krop, begge arme og begge ben
                     @"
-                     💴💴💴💴💴
-                     🚪       |
-                     🚪       😱
-                     🚪      \👕/
-                     🚪       👖
-                     🚪       / \
-                    🧱🧱   🪜[--]
+             💴💴💴💴💴
+             🚪        |
+             🚪        😱
+             🚪       \👕/
+             🚪        👖
+             🚪        / \
+            🧱🧱    🪜[--]
                     ",
                     // hoved, krop, begge arme og et ben
                     @"
-                     💴💴💴💴💴
-                     🚪       |
-                     🚪       😨
-                     🚪      \👕/
-                     🚪       👖
-                     🚪       / 
-                    🧱🧱   🪜[--]
+             💴💴💴💴💴
+             🚪        |
+             🚪        😨
+             🚪       \👕/
+             🚪        👖
+             🚪        / 
+            🧱🧱    🪜[--]
                     ",
                     // hoved, krop og begge arme
                     @"
-                     💴💴💴💴💴
-                     🚪       |
-                     🚪       😧
-                     🚪      \👕/
-                     🚪       👖
-                     🚪      
-                    🧱🧱   🪜[--]
+             💴💴💴💴💴
+             🚪        |
+             🚪        😧
+             🚪       \👕/
+             🚪        👖
+             🚪      
+            🧱🧱    🪜[--]
                     ",
                     // hoved, krop og en arm
                     @"
-                     💴💴💴💴💴
-                     🚪        |
-                     🚪        😦
-                     🚪       \👕
-                     🚪        👖
-                     🚪      
-                    🧱🧱    🪜[--]
+             💴💴💴💴💴
+             🚪        |
+             🚪        😦
+             🚪       \👕
+             🚪        👖
+             🚪      
+            🧱🧱    🪜[--]
                     ",
                     // hoved og krop
                     @"
-                     💴💴💴💴💴
-                     🚪        |
-                     🚪        🙁
-                     🚪        👕
-                     🚪        👖
-                     🚪      
-                    🧱🧱    🪜[--]
+             💴💴💴💴💴
+             🚪        |
+             🚪        🙁
+             🚪        👕
+             🚪        👖
+             🚪      
+            🧱🧱    🪜[--]
                     ",
                     // hoved
                     @"
-                     💴💴💴💴💴
-                     🚪        |
-                     🚪        😐
-                     🚪     
-                     🚪     
-                     🚪     
-                    🧱🧱    🪜[--]
+             💴💴💴💴💴
+             🚪        |
+             🚪        😐
+             🚪     
+             🚪     
+             🚪     
+            🧱🧱    🪜[--]
                     ",
                     // stolpe
                     @"
-                     💴💴💴💴💴
-                     🚪        |
-                     🚪      
-                     🚪     
-                     🚪      
-                     🚪      
-                    🧱🧱    🪜[--]
+             💴💴💴💴💴
+             🚪        |
+             🚪      
+             🚪     
+             🚪      
+             🚪      
+            🧱🧱    🪜[--]
                     ",
                     
                     // initial empty state bakke og boks
@@ -1473,7 +1474,7 @@ namespace GameGroupProject
                           
                           
                           
-                    🧱🧱    🪜[--]
+            🧱🧱    🪜[--]
                     ",
                 };
 
