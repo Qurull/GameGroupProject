@@ -78,9 +78,9 @@ namespace HangMan
                         { 
                             if (guessWord[i].ToString().ToLower() == guess[j].ToString().ToLower())
                             {
-                            hiddenWord[i] = guess[j];//gemmer det rigtige gæt i hiddenWord
-                            correctGuess = true;//sætter correctGuess til true
-                                                        }
+                                hiddenWord[i] = guess[j];//gemmer det rigtige gæt i hiddenWord
+                                correctGuess = true;//sætter correctGuess til true
+                            }
                         }
 
                     }
