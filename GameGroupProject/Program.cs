@@ -399,23 +399,23 @@ namespace GameGroupProject
                         PlaceColor(possibleColors[selectedColorIndex], boardPosition);
                         Console.Beep(BEEP_FREQUENCY, BEEP_DURATION);
 
-                        (int correctColorsCount, int incorrectColorsCount) = GetPinsByCurrentRow(selectedRow);
+                        (int blackPins, int whitePins) = GetPinsByCurrentRow(selectedRow);
                         selectedCol++;
 
                         if (selectedCol >= COL_SIZE)
                         {
                             Console.SetCursorPosition(boardPosition.x + 11, boardPosition.y + selectedRow);
-                            Console.Write(pins[correctColorsCount]);
+                            Console.Write(pins[blackPins]);
 
                             Console.SetCursorPosition(boardPosition.x + 17, boardPosition.y + selectedRow);
-                            Console.Write(pins[incorrectColorsCount]);
+                            Console.Write(pins[whitePins]);
                             selectedCol = 0;
 
                             PrintHighlighter(' ', (boardPosition.x - 1, boardPosition.y + selectedRow));
                             selectedRow++;
                             PrintHighlighter('▸', (boardPosition.x - 1, boardPosition.y + selectedRow));
                         }
-                        if (correctColorsCount == COL_SIZE)
+                        if (blackPins == COL_SIZE)
                         {
                             playerWon = true;
                             break;
