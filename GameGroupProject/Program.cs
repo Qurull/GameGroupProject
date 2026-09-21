@@ -525,19 +525,22 @@ namespace GameGroupProject
                 Console.ResetColor();
             }
 
-            (int redPins, int whitePins) GetPinsByCurrentRow(int row)
+            (int blackPins, int whitePins) GetPinsByCurrentRow(int row)
             {
-                int redPins = 0, whitePins = 0;
                 bool[] usedColors = new bool[secretColors.Length];
+                int blackPins = 0, whitePins = 0;
 
+                // Checking for black pins: If color and position is matching with in secret colors.
                 for (int i = 0; i < secretColors.Length; i++)
                 {
-                    if (colorFields[row, i] == secretColors[i])
-                    {
-                        usedColors[i] = true;
-                        redPins++;
-                    }
+                    if (colorFields[row, i] != secretColors[i])
+                        continue;
+
+                    usedColors[i] = true;
+                    blackPins++;
                 }
+
+                // Checking for white pins: If color is correct, but it's at the wrong position.
                 for (int i = 0; i < secretColors.Length; i++)
                 {
                     if (colorFields[row, i] == secretColors[i])
@@ -553,7 +556,8 @@ namespace GameGroupProject
                         }
                     }
                 }
-                return (redPins, whitePins);
+
+                return (blackPins, whitePins);
             }
         }
     
